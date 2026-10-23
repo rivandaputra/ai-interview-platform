@@ -63,7 +63,7 @@ RSpec.describe FitGap::Narrator do
     it 'flags low-confidence ratings and lists areas to probe' do
       narrative = narrate(fake_model(error: Gemini::HttpClient::TimeoutError.new('t')))
 
-      expect(narrative.overall).to include('1 rating rest on limited evidence')
+      expect(narrative.overall).to include('1 rating rests on limited evidence')
       expect(narrative.overall).to include('Areas to probe in the next conversation: Communication.')
     end
 

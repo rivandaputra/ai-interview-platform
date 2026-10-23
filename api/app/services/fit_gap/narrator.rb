@@ -80,7 +80,8 @@ module FitGap
                      'missing evidence is not evidence of a gap.'
       end
       if summary[:needs_verification].positive?
-        sentences << "#{pluralize(summary[:needs_verification], 'rating')} rest on limited evidence " \
+        count = summary[:needs_verification]
+        sentences << "#{pluralize(count, 'rating')} #{count == 1 ? 'rests' : 'rest'} on limited evidence " \
                      'and should be verified before deciding.'
       end
       gaps = labels_for(result, 'gap')

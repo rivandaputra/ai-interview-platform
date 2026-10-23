@@ -32,8 +32,10 @@ export default function LevelTrack({ required, candidate, result }: LevelTrackPr
             className={cn(
               "relative h-2.5 w-6 rounded-full transition-colors sm:w-7",
               filled ? RESULT_META[result].fill : "bg-muted",
-              candidate == null && "bg-[repeating-linear-gradient(135deg,hsl(var(--muted))_0_3px,transparent_3px_6px)] ring-1 ring-inset ring-border",
-              isRequired && "outline outline-2 outline-offset-2 outline-foreground/70"
+              candidate == null && "bg-[repeating-linear-gradient(135deg,hsl(var(--muted))_0_3px,transparent_3px_6px)]",
+              candidate == null && !isRequired && "ring-1 ring-inset ring-border",
+              // ring (box-shadow), not outline: tailwind-merge drops `outline` next to `outline-2`.
+              isRequired && "ring-2 ring-slate-500 ring-offset-2 ring-offset-white"
             )}
           />
         );

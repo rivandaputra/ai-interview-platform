@@ -150,6 +150,15 @@ describe("FitGapReportPage", () => {
     expect(api.ensureFitGap).not.toHaveBeenCalled();
   });
 
+  it("does not reveal whether a session from another organization exists", async () => {
+    vi.mocked(sessionsApi.getPortfolio).mockRejectedValue({ response: { status: 404 } });
+    renderPage();
+
+    expect(await screen.findByText("This report isn't available")).toBeInTheDocument();
+    expect(screen.getByText(/doesn't exist or isn't shared with your organization/)).toBeInTheDocument();
+    expect(api.ensureFitGap).not.toHaveBeenCalled();
+  });
+
   it("shows a recoverable error when the report cannot be loaded", async () => {
     api.ensureFitGap.mockReturnValueOnce(httpError(500, "An unexpected error occurred.") as never)
                     .mockReturnValue(ok(makeReport()));

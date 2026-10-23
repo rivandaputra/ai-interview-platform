@@ -9,6 +9,7 @@ import {
   ListChecks,
   Loader2,
   RefreshCw,
+  SearchX,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ export default function FitGapReportPage() {
   const portfolioPath = `/assessments/${id}/sessions/${sessionId}/portfolio`;
 
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
-  const [portfolioState, setPortfolioState] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [portfolioState, setPortfolioState] = useState<"loading" | "ready" | "unavailable" | "not_found">("loading");
   const [roleTitle, setRoleTitle] = useState<string | null>(null);
   const [exporting, setExporting] = useState<"pdf" | "json" | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -118,7 +119,11 @@ export default function FitGapReportPage() {
           setPortfolioState("unavailable");
         }
       })
-      .catch(() => active && setPortfolioState("unavailable"));
+      .catch((error) => {
+        if (!active) return;
+        // 404 covers both "does not exist" and "belongs to another organization"; we don't say which.
+        setPortfolioState(error?.response?.status === 404 ? "not_found" : "unavailable");
+      });
     vacanciesApi
       .get(Number(vacancyId))
       .then((res) => active && setRoleTitle(res.data.vacancy.role_title))
@@ -209,6 +214,16 @@ export default function FitGapReportPage() {
         <Skeleton className="h-28 w-full rounded-xl" />
         <RowsSkeleton />
       </div>
+    );
+  } else if (portfolioState === "not_found") {
+    content = (
+      <EmptyState
+        icon={<SearchX className="h-5 w-5" />}
+        title="This report isn't available"
+        action={<Link to="/assessments" className="text-sm font-medium text-primary hover:underline">Back to assessments</Link>}
+      >
+        The candidate session doesn't exist or isn't shared with your organization.
+      </EmptyState>
     );
   } else if (portfolioState === "unavailable" || phase === "not_ready") {
     content = (
