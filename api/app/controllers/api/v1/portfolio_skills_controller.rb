@@ -40,12 +40,14 @@ module Api
 
       private
 
+      # Keeps existing reports visible (they become "outdated" via their
+      # inputs digest) and queues a refresh for each. Never deletes them.
       def regenerate_stale_fitgap_reports
         portfolio = @portfolio_skill.portfolio
-        FitGapReport.where(portfolio_id: portfolio.id).each do |report|
-          vacancy_id = report.vacancy_id
-          report.destroy
-          FitGapGeneratorWorker.perform_async(portfolio.id, vacancy_id)
+        FitGapReport.where(portfolio_id: portfolio.id).includes(:vacancy).find_each do |report|
+          next unless report.vacancy
+
+          FitGap::Scheduler.request(portfolio:, vacancy: report.vacancy)
         end
       end
 
