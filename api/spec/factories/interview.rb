@@ -65,6 +65,7 @@ FactoryBot.define do
   factory :fit_gap_report do
     portfolio
     vacancy
+    status { 'complete' }
     skill_comparisons do
       [{ 'skill_label' => 'Communication', 'expected_level' => 3, 'candidate_level' => 2, 'result' => 'gap', 'delta' => -1 }]
     end
