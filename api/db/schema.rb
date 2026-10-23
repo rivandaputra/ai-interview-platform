@@ -93,6 +93,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_10_23_000000) do
     t.text "error_message"
     t.string "inputs_digest", limit: 64
     t.string "narrative_source", limit: 20
+    t.datetime "queued_at"
     t.datetime "generation_started_at"
     t.index ["portfolio_id", "vacancy_id"], name: "index_fit_gap_reports_on_portfolio_id_and_vacancy_id", unique: true
     t.index ["portfolio_id"], name: "index_fit_gap_reports_on_portfolio_id"

@@ -27,6 +27,10 @@ class FitGapReport < ApplicationRecord
     generation_started_at.nil? || generation_started_at < now - GENERATION_LEASE
   end
 
+  def queue_lease_expired?(now = Time.current)
+    queued_at.nil? || queued_at < now - GENERATION_LEASE
+  end
+
   private
 
   def skill_comparisons_is_an_array

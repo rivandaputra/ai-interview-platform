@@ -41,7 +41,7 @@ RSpec.describe AddLifecycleToFitGapReports do
     migration.migrate(:down)
     expect(columns).not_to include('status', 'inputs_digest', 'narrative_source', 'error_message')
     migration.migrate(:up)
-    expect(columns).to include('status', 'inputs_digest', 'narrative_source', 'error_message', 'generation_started_at')
+    expect(columns).to include('status', 'inputs_digest', 'narrative_source', 'error_message', 'queued_at', 'generation_started_at')
   end
 
   after { FitGapReport.reset_column_information }
