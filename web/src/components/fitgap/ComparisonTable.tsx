@@ -105,12 +105,12 @@ export default function ComparisonTable({ comparisons, busy = false }: Compariso
             </div>
 
             <div className="flex items-center justify-between gap-3 sm:block sm:space-y-1.5">
-              <LevelTrack required={(c as unknown as { required_level: number | null }).required_level ?? null} candidate={c.candidate_level} result={c.result} />
+              <LevelTrack required={c.expected_level} candidate={c.candidate_level} result={c.result} />
               <p className="text-xs tabular-nums text-muted-foreground">
                 <span data-testid="candidate-level" className="font-semibold text-foreground">
                   {level(c.candidate_level)}
                 </span>{" "}
-                of <span data-testid="required-level">{level((c as unknown as { required_level: number | null }).required_level ?? null)}</span> required
+                of <span data-testid="required-level">{level(c.expected_level)}</span> required
               </p>
             </div>
 
