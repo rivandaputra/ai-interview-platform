@@ -74,7 +74,7 @@
 <!-- ───────────────────────── Step 1 ───────────────────────── -->
 <h2 class="page-break">Step 1 — Setup & local exploration</h2>
 <ul>
-  <li>Cloned the repo and branched <code>feat/trustworthy-fitgap</code> off <code>main</code>. The work is in 27 small commits, and the failing tests are committed before their fixes.</li>
+  <li>Cloned the repo and branched <code>feat/trustworthy-fitgap</code> off <code>main</code>. The work is split into small, reviewable commits, and the failing tests are committed before their fixes.</li>
   <li>Ran Rails 7 / Ruby 3.3.2 (rbenv), PostgreSQL, Redis, Sidekiq and Vite locally, using fresh databases and an isolated Redis DB index so nothing else on the machine was touched. A Docker image was tried first and dropped because it built too slowly.</li>
   <li>The interview needs Gemini Live, so I seeded <b>fictional</b> two-tenant data: an ended session, a complete portfolio and a vacancy including a skill that was never probed. I then exercised every fit/gap endpoint with curl and read the rows in Postgres and the Sidekiq logs.</li>
   <li>Baseline: no specs, no web test runner, no CI. I added an RSpec harness (factories, tenant helpers, Sidekiq fake), Vitest + Testing Library, and GitHub Actions.</li>
