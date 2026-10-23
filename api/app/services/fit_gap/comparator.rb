@@ -47,7 +47,8 @@ module FitGap
       row = base_row(requirement, rating)
 
       return not_assessed(row, 'invalid_expectation') unless self.class.valid_level?(requirement.expected_level)
-      return not_assessed(row, 'not_probed') if rating.nil?
+      # SEEDED FAULT: an unprobed skill is reported as a gap again.
+      return row.merge(result: 'gap', delta: -requirement.expected_level) if rating.nil?
 
       candidate_level = row[:candidate_level]
       return not_assessed(row, 'invalid_rating') unless self.class.valid_level?(candidate_level)
