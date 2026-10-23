@@ -14,6 +14,7 @@ Type: **D** = defective implementation (defined, broken) · **M** = missing spec
 
 | # | Sev | Type | Service | Finding | Impact on real workflow |
 |---|---|---|---|---|---|
+| F0 | **P0** | D | api | The API cannot boot in production: `production.rb` configures Active Job (never loaded) → `NoMethodError`; once removed, eager loading fails on `AudioWebsocketMiddleware` (file name vs. `WebSocket` acronym). Found when CI eager-loaded the app. Evidence: [`evidence/api-05-production-boot.txt`](evidence/api-05-production-boot.txt). | Nothing ships. A release blocker independent of any feature work. |
 | F1 | **P0** | D | api ↔ web seam | API serialises `expected_level`; web reads `required_level`. "Required" column is blank on every row. PDF export reads `expected_level`, so screen and PDF disagree. `tsc` passes — the web type mirrors itself, not the API. | Assessor cannot see what the role requires on the very screen meant to compare it. |
 | F2 | **P0** | D | api | `POST /portfolios/:id/fitgap`, `GET …/fitgap/:vacancy_id`, `POST …/regenerate_fitgap`, `GET …/export` use `Portfolio.find` with no tenant check. Verified: tenant A exported tenant B's portfolio incl. evidence quotes (HTTP 200) and persisted a cross-tenant report. `PortfolioSkill` override has the same hole. | Candidate data of one company readable/writable by another — UU PDP confidentiality breach. |
 | F3 | **P1** | D | api ↔ web | Override does `report.destroy` + enqueue. Verified: report returns 404 immediately; the page reacts to 404 by enqueuing *another* job → duplicate jobs (4 jobs for 2 requests). If the job fails, the report is gone. | Assessor sees the report vanish after correcting a level; workers race on the same row. |
@@ -31,11 +32,12 @@ Type: **D** = defective implementation (defined, broken) · **M** = missing spec
 
 ## Constraint signal — what I would escalate to the Tech Lead
 
-1. **Tenancy model is fail-open.** `TenantScoped` falls back to `all` when no tenant is resolved, and `Portfolio`/`PortfolioSkill`/`FitGapReport`/`AssessorOverride` carry no `tenant_id` at all. Fixing F2 per endpoint is necessary but not sufficient; the long-term fix (tenant_id on every table + fail-closed scope + Postgres RLS) is a cross-team decision.
-2. **Tenant resolved from an unverified JWT decode.** `TenantResolverMiddleware` uses `decode_without_verification`; it is safe today only because `AuthTokenMiddleware` verifies afterwards on assessor routes. Any route without `authorize_auth_token!` trusts a forged `scheme`.
-3. **No data retention / deletion path** for transcripts, audio-derived text and portfolios (UU PDP right to erasure). Needs a product + legal decision.
-4. **Deadline ambiguity.** Brief says Wednesday 19 August 13:00 WIB; working date is 23 October 2026. Assumed the portal deadline governs.
+1. **Release blocker (F0).** `main` cannot boot with `eager_load = true`. Fixed here with a one-line config removal and a Zeitwerk inflection, but it means production has not been deployed from this tree, or is deployed with a config not in the repo — needs confirming before any release.
+2. **Tenancy model is fail-open.** `TenantScoped` falls back to `all` when no tenant is resolved, and `Portfolio`/`PortfolioSkill`/`FitGapReport`/`AssessorOverride` carry no `tenant_id` at all. Fixing F2 per endpoint is necessary but not sufficient; the long-term fix (tenant_id on every table + fail-closed scope + Postgres RLS) is a cross-team decision.
+3. **Tenant resolved from an unverified JWT decode.** `TenantResolverMiddleware` uses `decode_without_verification`; it is safe today only because `AuthTokenMiddleware` verifies afterwards on assessor routes. Any route without `authorize_auth_token!` trusts a forged `scheme`.
+4. **No data retention / deletion path** for transcripts, audio-derived text and portfolios (UU PDP right to erasure). Needs a product + legal decision.
+5. **Deadline ambiguity.** Brief says Wednesday 19 August 13:00 WIB; working date is 23 October 2026. Assumed the portal deadline governs.
 
 ## Scope decision
 
-This PR fixes F1–F7 and F9–F11 end to end (the Fit/Gap slice), plus F2 for every portfolio/override endpoint and F12. F8 is mitigated by preserving overrides across regeneration; F13 and the tenancy re-architecture are documented, not fixed.
+This PR fixes F0, F1–F7 and F9–F11 end to end (the Fit/Gap slice), plus F2 for every portfolio/override endpoint and F12. F8 is mitigated by preserving overrides across regeneration; F13 and the tenancy re-architecture are documented, not fixed.
